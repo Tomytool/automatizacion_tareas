@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "pandas-pro": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pandas-pro/SKILL.md",
+      "computedHash": "244a87c4e9e20aac2822cdd99a221a7fa6999bf1194abbbd4a5e16bde34bf6ef"
+    }
+  }
+}

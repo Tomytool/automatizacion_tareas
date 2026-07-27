@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import datetime
+import io
 
 #configuracion de la pagina principal
 st.set_page_config(page_title="Automatización", page_icon=":smiley:", layout="wide")
@@ -42,11 +44,56 @@ def load_data():
     
     return df_pivot_final
 
+
+def filtrar_fecha(df, fecha):
+    return df[df["Fecha del Turno"] >= pd.Timestamp(fecha)]
+
 def main():
-    st.title("Automatización de procesos con Streamlit")
-    st.dataframe(load_data())
-
-
+    st.title("Automatización reportes asistencia")
+    
+    df = load_data()
+    
+    # Obtener los fiscalizadores únicos para el selector
+    fiscalizadores = ["Todos"] + df["Nombre Fiscalizador"].unique().tolist()
+    
+    # Barra lateral con el selector de fiscalizadores
+    with st.sidebar:
+        st.header("Filtros")
+        fiscalizador_seleccionado = st.selectbox(
+            "Seleccione Fiscalizador:",
+            options=fiscalizadores
+        )
+    
+    # Filtrar por el fiscalizador seleccionado
+    if fiscalizador_seleccionado == "Todos":
+        df_filtrado = df
+    else:
+        df_filtrado = df[df["Nombre Fiscalizador"] == fiscalizador_seleccionado]
+    
+    filtro_fecha = st.date_input("Fecha del Turno")
+    
+    # Filtrar reactivamente por la fecha seleccionada
+    df_final = filtrar_fecha(df_filtrado, filtro_fecha)
+    
+    st.dataframe(df_final)
+    
+    # Convertir el DataFrame final a Excel en memoria
+    df_excel = df_final.copy()
+    if 'Fecha del Turno' in df_excel.columns:
+        df_excel['Fecha del Turno'] = df_excel['Fecha del Turno'].dt.strftime('%d/%m/%Y')
+        
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_excel.to_excel(writer, index=False, sheet_name='Reporte')
+    excel_data = output.getvalue()
+    
+    # Botón para descargar el archivo de Excel
+    st.download_button(
+        label="📥 Descargar Excel",
+        data=excel_data,
+        file_name=f"reporte_asistencia_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 if __name__ == "__main__":
     main()
