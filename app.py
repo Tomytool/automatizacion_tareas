@@ -30,8 +30,22 @@ def load_data():
         'Termino': 'Hora de Termino'
     })
 
-    # Definir el orden deseado de las columnas
-    nuevo_orden_columnas = ["Sede", "Nombre Fiscalizador", "Fecha del Turno", "Hora de Inicio", "Hora de Termino"]
+    # Mapeo de Run y Dv según el Nombre Fiscalizador
+    mapeo_run = {
+        "Jose Ibaceta": "11.517.253",
+        "Luis Cortes": "18.259.548",
+        "Jose Hernandez": "13.522.908"
+    }
+    mapeo_dv = {
+        "Jose Ibaceta": "0",
+        "Luis Cortes": "9",
+        "Jose Hernandez": "3"
+    }
+    df_pivot_final["Run"] = df_pivot_final["Nombre Fiscalizador"].map(mapeo_run).fillna("")
+    df_pivot_final["Dv"] = df_pivot_final["Nombre Fiscalizador"].map(mapeo_dv).fillna("")
+
+    # Definir el orden deseado de las columnas, incluyendo Run y Dv
+    nuevo_orden_columnas = ["Sede", "Nombre Fiscalizador", "Run", "Dv", "Fecha del Turno", "Hora de Inicio", "Hora de Termino"]
 
     # Reordenar las columnas del DataFrame
     df_pivot_final = df_pivot_final[nuevo_orden_columnas]
